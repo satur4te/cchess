@@ -1,23 +1,28 @@
-#include <stdio.h>
 #include "common/log.h"
-
-#ifdef DEBUG
+#include <stdio.h>
+#include <stdarg.h>
+#if defined(DEBUG) && defined(__LOGFILE__)
 static FILE* fp;
+#define __LOGPATH__ "cchess.log"
 #endif
 
 #ifdef DEBUG
-void _log(const char* const tag, const char* const fmt, ...)
+__attribute__((__format__ (__printf__, 4, 0)))
+void _log(const char* const tag, 
+          const char* const file_name, 
+          int line_number, 
+          const char* const fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
 #ifdef __LOGFILE__
     if(fp != NULL)
     {
-        fprintf(fp ,"[%s]: ", tag);
+        fprintf(fp ,"%s:%d [%s]: ", file_name, line_number, tag);
         vfprintf(fp, fmt, args);
     }
 #else
-    printf("[%s]: ", tag);
+    printf("%s:%d [%s]: ", file_name, line_number, tag);
     vprintf(fmt, args);
 #endif
 }
@@ -26,7 +31,7 @@ void _log(const char* const tag, const char* const fmt, ...)
 void log_init( void ) 
 {
 #ifdef __LOGFILE__
-    fp = fopen(__LOGFILE__, "w+");
+    fp = fopen(__LOGPATH__, "w+");
 #endif
 }
 
