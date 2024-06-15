@@ -1,14 +1,15 @@
 #include "common/log.h"
 #include <stdio.h>
 #include <stdarg.h>
-#if defined(DEBUG) && defined(__LOGFILE__)
+
+#if ! defined(NDEBUG) && defined(__LOGFILE__)
 static FILE* fp;
 #define __LOGPATH__ "cchess.log"
 #endif
 
-#ifdef DEBUG
+#ifndef NDEBUG
 __attribute__((__format__ (__printf__, 4, 0)))
-void _log(const char* const tag, 
+void _log(LOG_TAG tag, 
           const char* const file_name, 
           int line_number, 
           const char* const fmt, ...)
@@ -16,15 +17,15 @@ void _log(const char* const tag,
     va_list args;
     va_start(args, fmt);
 #ifdef __LOGFILE__
-    if(fp != NULL)
+    if(fp)
     {
-        fprintf(fp ,"%s:%d [%s]: ", file_name, line_number, tag);
+        fprintf(fp ,"%s:%d [%s]: ", file_name, line_number, tag_to_str(tag));
         vfprintf(fp, fmt, args);
+        log_flush();
     }
-#else
-    printf("%s:%d [%s]: ", file_name, line_number, tag);
-    vprintf(fmt, args);
 #endif
+    printf("%s%s:%d [%s]%s: ", tag_to_color(tag), file_name, line_number, tag_to_str(tag), LOG_COLOR_END);
+    vprintf(fmt, args);
 }
 #endif
 
@@ -38,14 +39,16 @@ void log_init( void )
 void log_flush( void ) 
 {
 #ifdef __LOGFILE__
-    fflush(fp);
+    if (fp)
+        fflush(fp);
 #endif
-
 }
+
 void log_close( void )
 {
 #ifdef __LOGFILE__
-    fclose(fp);
+    if (fp)
+        fclose(fp);
 #endif
 }
 

@@ -12,7 +12,7 @@ void init_context( void )
     context.game_state = ACTIVE;
     context.current_color = WHITE;
 
-    LOG_INFO("global context initiated", 0);
+    LOG_INFO("global context initiated\n", 0);
 }
 
 void init_board( void )
